@@ -1,0 +1,31 @@
+#include <windows.h>
+
+1 RT_MANIFEST "launcher.manifest"
+
+1 VERSIONINFO
+FILEVERSION 3,0,2,0
+PRODUCTVERSION 3,0,2,0
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x40004L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080404B0"
+    BEGIN
+      VALUE "CompanyName", "Community Tool\0"
+      VALUE "FileDescription", "Codex Dream Skin Windows GUI\0"
+      VALUE "FileVersion", "3.0.2.0\0"
+      VALUE "InternalName", "CodexDreamSkinLauncher\0"
+      VALUE "OriginalFilename", "CodexDreamSkinLauncher.exe\0"
+      VALUE "ProductName", "Codex Dream Skin\0"
+      VALUE "ProductVersion", "3.0.2.0\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0804, 1200
+  END
+END

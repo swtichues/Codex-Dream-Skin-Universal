@@ -1,0 +1,224 @@
+{
+    "schemaVersion":  1,
+    "pass":  true,
+    "generatedAt":  "2026-07-31T07:15:22.9457182Z",
+    "packageRoot":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal",
+    "powershell":  "5.1.26100.8457",
+    "checks":  [
+                   {
+                       "name":  "package-root",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal"
+                   },
+                   {
+                       "name":  "powershell-bom/CodexDreamSkinLauncher.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/CodexDreamSkinLauncher.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/build-launcher-exe.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/build-launcher-exe.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/change-codex-dream-skin-background.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/change-codex-dream-skin-background.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/common-windows.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/common-windows.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/compat-universal.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/compat-universal.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/config-utf8.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/config-utf8.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/gui-stage-smoke.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/gui-stage-smoke.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/install-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/install-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/restore-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/restore-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/scan-and-configure.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/scan-and-configure.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/start-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/start-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/theme-windows.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/theme-windows.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/tray-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/tray-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "powershell-bom/verify-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  "Windows PowerShell 5.1 需要 UTF-8 BOM 才能可靠解析中文。"
+                   },
+                   {
+                       "name":  "powershell-parse/verify-dream-skin.ps1",
+                       "pass":  true,
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "strict-utf8/dream-skin.css",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\assets\\dream-skin.css"
+                   },
+                   {
+                       "name":  "strict-utf8/renderer-inject.js",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\assets\\renderer-inject.js"
+                   },
+                   {
+                       "name":  "strict-utf8/theme.json",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\assets\\theme.json"
+                   },
+                   {
+                       "name":  "json/theme.json",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\assets\\theme.json"
+                   },
+                   {
+                       "name":  "strict-utf8/theme.json",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\presets\\preset-gothic-void-crusade\\theme.json"
+                   },
+                   {
+                       "name":  "json/theme.json",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\presets\\preset-gothic-void-crusade\\theme.json"
+                   },
+                   {
+                       "name":  "strict-utf8/image-metadata.mjs",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\scripts\\image-metadata.mjs"
+                   },
+                   {
+                       "name":  "strict-utf8/injector.mjs",
+                       "pass":  true,
+                       "detail":  "C:\\software\\ChatGPT\\Codex-Dream-Skin-Universal\\windows\\scripts\\injector.mjs"
+                   },
+                   {
+                       "name":  "unicode-path-roundtrip",
+                       "pass":  true,
+                       "detail":  "C:\\Users\\86158\\AppData\\Local\\Temp\\Codex换肤 路径编码测试 2005bda072a34c8f85b15c7419bdcd0f\\配置 文件.json"
+                   },
+                   {
+                       "name":  "data-utf8-no-bom",
+                       "pass":  true,
+                       "detail":  "运行状态和配置数据保持严格 UTF-8（无 BOM）。"
+                   },
+                   {
+                       "name":  "config-install-preserves-unicode",
+                       "pass":  true,
+                       "detail":  "C:\\Users\\86158\\AppData\\Local\\Temp\\Codex换肤 路径编码测试 2005bda072a34c8f85b15c7419bdcd0f\\配置 目录\\config.toml"
+                   },
+                   {
+                       "name":  "config-backup-byte-exact",
+                       "pass":  true,
+                       "detail":  "C:\\Users\\86158\\AppData\\Local\\Temp\\Codex换肤 路径编码测试 2005bda072a34c8f85b15c7419bdcd0f\\状态 目录\\config.before-dream-skin.toml"
+                   },
+                   {
+                       "name":  "config-selective-restore-byte-exact",
+                       "pass":  true,
+                       "detail":  "C:\\Users\\86158\\AppData\\Local\\Temp\\Codex换肤 路径编码测试 2005bda072a34c8f85b15c7419bdcd0f\\配置 目录\\config.toml"
+                   },
+                   {
+                       "name":  "unicode-process-arguments",
+                       "pass":  true,
+                       "detail":  "C:\\测试 路径\\皮肤 图片.png"
+                   }
+               ]
+}
