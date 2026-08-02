@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readImageMetadata } from "./image-metadata.mjs";
+import { detectImageFormat, readImageMetadata } from "./image-metadata.mjs";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const here = path.dirname(scriptPath);
@@ -127,6 +127,7 @@ function parseArgs(argv) {
     else if (arg === "--once") options.mode = "once";
     else if (arg === "--watch") options.mode = "watch";
     else if (arg === "--verify") options.mode = "verify";
+    else if (arg === "--wait-ready") options.mode = "wait-ready";
     else if (arg === "--remove") options.mode = "remove";
     else if (arg === "--begin-operation") options.mode = "begin-operation";
     else if (arg === "--finish-operation") options.mode = "finish-operation";
@@ -173,7 +174,7 @@ function parseArgs(argv) {
     }
     if (!options.browserId) throw new Error("--browser-id is required in finish-operation mode");
   }
-  if (["watch", "once", "verify", "remove"].includes(options.mode) && !options.browserId) {
+  if (["watch", "once", "verify", "remove", "wait-ready"].includes(options.mode) && !options.browserId) {
     throw new Error(`--browser-id is required in ${options.mode} mode`);
   }
   return options;
@@ -504,6 +505,8 @@ async function loadTheme(themeDir) {
   if (!artMetadata) {
     throw new Error("Theme image metadata is invalid or exceeds the 16384px / 50MP safety limit");
   }
+  const imageFormat = detectImageFormat(imageBytes);
+  if (!imageFormat) throw new Error("Theme image format is unsupported or invalid");
   theme.artMetadata = artMetadata;
   const fingerprint = createHash("sha256")
     .update(themeText, "utf8")
@@ -514,6 +517,7 @@ async function loadTheme(themeDir) {
     theme,
     themePath,
     imagePath: realImagePath,
+    imageFormat,
     imageBytes,
     fingerprint,
     sourceStamp: `${themeStat.size}:${themeStat.mtimeMs}:${imageStat.size}:${imageStat.mtimeMs}`,
@@ -526,9 +530,8 @@ async function loadPayload(themeDir = path.join(root, "assets"), candidateTheme 
     fs.readFile(path.join(root, "assets", "dream-skin.css"), "utf8"),
     fs.readFile(path.join(root, "assets", "renderer-inject.js"), "utf8"),
   ]);
-  const extension = path.extname(loadedTheme.imagePath).toLowerCase();
-  const mime = extension === ".jpg" || extension === ".jpeg" ? "image/jpeg"
-    : extension === ".webp" ? "image/webp" : "image/png";
+  const mime = loadedTheme.imageFormat === "jpeg" ? "image/jpeg"
+    : loadedTheme.imageFormat === "webp" ? "image/webp" : "image/png";
   const artDataUrl = `data:${mime};base64,${loadedTheme.imageBytes.toString("base64")}`;
   const payload = template
     .replace("__DREAM_CSS_JSON__", JSON.stringify(css))
@@ -582,7 +585,12 @@ async function probeSession(session) {
       markers,
       branded,
       protocol: location.protocol,
-      codex: supportedProtocol && markers.shell && (markers.composer || branded),
+      // Codex can keep auxiliary app:// pages (for example the avatar
+      // overlay) alive beside the renderer. They share the branded title and
+      // may expose a <main>, but they are not skin-capable app surfaces.
+      // Require a functional shell marker so these pages cannot turn a
+      // successful apply into a false verification failure.
+      codex: supportedProtocol && markers.shell && (markers.composer || markers.sidebar),
     };
   })()`);
 }
@@ -900,6 +908,7 @@ async function verifyRemovedSession(session) {
 
 async function verifySession(session) {
   return session.evaluate(`(() => {
+    const root = document.documentElement;
     const box = (node) => {
       if (!node) return null;
       const r = node.getBoundingClientRect();
@@ -918,12 +927,35 @@ async function verifySession(session) {
     const cards = suggestions ? [...suggestions.querySelectorAll('button')].map(box) : [];
     const composer = box(document.querySelector('.composer-surface-chrome'));
     const sidebar = box(document.querySelector('aside.app-shell-left-panel'));
+    const artVariable = root?.style.getPropertyValue('--dream-art')?.trim() || '';
+    const bodyBackground = getComputedStyle(document.body || root).backgroundImage || '';
+    const artLayer = [...document.querySelectorAll('.dream-task, .dream-home')]
+      .map((node) => [
+        getComputedStyle(node).backgroundImage || '',
+        getComputedStyle(node, '::before').backgroundImage || '',
+      ])
+      .flat()
+      .find((value) => value.includes('blob:') || value.includes('data:image/')) || '';
+    const renderedArtNode = [...document.querySelectorAll('.dream-task, .dream-home')]
+      .find((node) => {
+        const style = getComputedStyle(node, '::before');
+        return style.backgroundImage.includes('blob:') || style.backgroundImage.includes('data:image/');
+      });
+    const renderedArtStyle = renderedArtNode ? getComputedStyle(renderedArtNode, '::before') : null;
+    const artPresent = Boolean(
+      artVariable && (
+        bodyBackground.includes('blob:') || bodyBackground.includes('data:image/') ||
+        (artLayer && renderedArtStyle?.content !== 'none' && renderedArtStyle?.display !== 'none' &&
+          Number.parseFloat(renderedArtStyle?.opacity || '0') > 0)
+      ),
+    );
     const viewport = { width: innerWidth, height: innerHeight };
     const composerVisible = Boolean(composer && composer.width > 0 && composer.height > 0 &&
       composer.x < viewport.width && composer.x + composer.width > 0 &&
       composer.y < viewport.height && composer.y + composer.height > 0);
     const result = {
       installed: document.documentElement.classList.contains('codex-dream-skin'),
+      artPresent,
       version: window.__CODEX_DREAM_SKIN_STATE__?.version ?? null,
       expectedVersion: ${JSON.stringify(SKIN_VERSION)},
       stylePresent: Boolean(document.getElementById('codex-dream-skin-style')),
@@ -945,7 +977,7 @@ async function verifySession(session) {
         y: document.documentElement.scrollHeight > document.documentElement.clientHeight,
       },
     };
-    result.pass = result.installed && result.version === result.expectedVersion &&
+    result.pass = result.installed && result.artPresent && result.version === result.expectedVersion &&
       result.stylePresent && result.chromePresent &&
       result.chromePointerEvents === 'none' && result.composerVisible && Boolean(result.sidebar) &&
       (!result.homePresent || (result.modernHome ? result.homeIconPresent : (Boolean(result.hero) &&
@@ -1129,6 +1161,20 @@ async function runOneShot(options) {
   const failed = results.length === 0 || results.some((item) =>
     item.error || (options.mode === "remove" ? item.result !== true : !item.result?.pass));
   if (failed) process.exitCode = 2;
+}
+
+async function runWaitReady(options) {
+  // Readiness gate: wait until at least one Codex renderer page exposes the
+  // expected shell markers. Used by start-dream-skin.ps1 before the watcher
+  // attaches, so a slow-booting desktop client is never probed mid-startup.
+  const connected = await connectCodexTargets(options.port, options.timeoutMs, options.browserId);
+  const targetId = connected[0]?.target.id ?? null;
+  for (const { session } of connected) session.close();
+  if (!targetId) {
+    process.exitCode = 2;
+    return;
+  }
+  console.log(JSON.stringify({ pass: true, targetId }));
 }
 
 async function runWatch(options) {
@@ -1446,6 +1492,7 @@ if (path.resolve(process.argv[1] || "") === path.resolve(scriptPath)) {
     }));
   } else if (options.mode === "begin-operation") await runBeginOperation(options);
   else if (options.mode === "finish-operation") await runFinishOperation(options);
+  else if (options.mode === "wait-ready") await runWaitReady(options);
   else if (options.mode === "watch") await runWatch(options);
   else await runOneShot(options);
 }

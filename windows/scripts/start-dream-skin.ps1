@@ -193,6 +193,30 @@ try {
   $state = $null
   $daemon = $null
   try {
+    # A cold-launched desktop client can take tens of seconds to render its
+    # shell. Wait for the renderer markers before attaching the watcher; the
+    # verification step would otherwise fail against a still-booting page.
+    Write-Host 'Waiting for the Codex renderer to become ready ...'
+    $ready = Invoke-DreamSkinNative -FilePath $node.Path -ArgumentList @(
+      $Injector, '--wait-ready', '--port', "$Port",
+      '--browser-id', $cdpIdentity.BrowserId, '--timeout-ms', '120000')
+    if ($ready.ExitCode -ne 0) {
+      throw "The Codex renderer did not become ready within 120 seconds. $($ready.Output -join ' ')"
+    }
+
+    # Apply and verify synchronously before starting the long-lived watcher.
+    # Starting --watch and running --verify in separate processes races the
+    # first injection and can trigger rollback/restart while Codex is booting.
+    $onceResult = Invoke-DreamSkinNative -FilePath $node.Path -ArgumentList @(
+      $Injector, '--once', '--port', "$Port",
+      '--browser-id', $cdpIdentity.BrowserId, '--theme-dir',
+      (ConvertTo-DreamSkinProcessArgument -Value $themePaths.Active),
+      '--timeout-ms', '30000')
+    Write-DreamSkinUtf8FileAtomically -Path $VerifyPath -Content (($onceResult.Output -join "`r`n") + "`r`n")
+    if ($onceResult.ExitCode -ne 0) {
+      throw "Dream Skin application failed. See $VerifyPath"
+    }
+
     $injectorArgs = @((ConvertTo-DreamSkinProcessArgument -Value $Injector), '--watch', '--port', "$Port",
       '--browser-id', $cdpIdentity.BrowserId, '--theme-dir',
       (ConvertTo-DreamSkinProcessArgument -Value $themePaths.Active), '--pause-file',
@@ -231,11 +255,6 @@ try {
     }
     Write-DreamSkinState -Path $StatePath -State $state
 
-    $verify = Invoke-DreamSkinNative -FilePath $node.Path -ArgumentList @(
-      $Injector, '--verify', '--port', "$Port",
-      '--browser-id', $cdpIdentity.BrowserId, '--timeout-ms', '30000')
-    Write-DreamSkinUtf8FileAtomically -Path $VerifyPath -Content (($verify.Output -join "`r`n") + "`r`n")
-    if ($verify.ExitCode -ne 0) { throw "Dream Skin verification failed. See $VerifyPath" }
   } catch {
     $startupError = $_
     $injectorStopped = $true

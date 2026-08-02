@@ -35,6 +35,19 @@ function ascii(bytes, offset, length) {
   return String.fromCharCode(...bytes.subarray(offset, offset + length));
 }
 
+export function detectImageFormat(value) {
+  const bytes = value instanceof Uint8Array ? value : new Uint8Array(value);
+  const isPng = bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  if (isPng) return "png";
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xd8) return "jpeg";
+  if (bytes.length >= 12 && ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 4) === "WEBP") {
+    return "webp";
+  }
+  return null;
+}
+
 function pngDimensions(bytes) {
   const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
   if (bytes.length < 24 || signature.some((value, index) => bytes[index] !== value) ||
@@ -125,12 +138,11 @@ export function classifyImageDimensions({ width, height }) {
 
 export function readImageMetadata(value, extension = "") {
   const bytes = value instanceof Uint8Array ? value : new Uint8Array(value);
-  const normalized = extension.toLowerCase();
+  const format = detectImageFormat(bytes);
   let dimensions = null;
-  if (normalized === ".png" || bytes[0] === 0x89) dimensions = pngDimensions(bytes);
-  else if (normalized === ".jpg" || normalized === ".jpeg" ||
-    (bytes[0] === 0xff && bytes[1] === 0xd8)) dimensions = jpegDimensions(bytes);
-  else if (normalized === ".webp" || ascii(bytes, 8, 4) === "WEBP") dimensions = webpDimensions(bytes);
+  if (format === "png") dimensions = pngDimensions(bytes);
+  else if (format === "jpeg") dimensions = jpegDimensions(bytes);
+  else if (format === "webp") dimensions = webpDimensions(bytes);
   return dimensions ? classifyImageDimensions(dimensions) : null;
 }
 

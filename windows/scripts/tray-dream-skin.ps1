@@ -144,7 +144,31 @@ try {
         if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
           $null = Set-DreamSkinActiveTheme -ImagePath $dialog.FileName -Theme $null -StateRoot $StateRoot
           Set-DreamSkinPaused -Paused $false -StateRoot $StateRoot | Out-Null
-          $notify.ShowBalloonTip(1800, 'Codex Dream Skin', '背景图已更新。', [System.Windows.Forms.ToolTipIcon]::Info)
+          # A stale state file can make the tray report success while the
+          # watcher has already exited. Re-apply through the normal start path
+          # when either the CDP session or the recorded watcher is unavailable.
+          $session = Get-DreamSkinLiveSessionContext -StateRoot $StateRoot
+          $watcherLive = $false
+          if ($null -ne $session) {
+            try {
+              $savedCodex = Get-DreamSkinCodexInstallFromState -State $session.State
+              $identity = if ($null -ne $savedCodex) {
+                Get-DreamSkinVerifiedCdpIdentity -Port $session.Port -Codex $savedCodex
+              } else { $null }
+              $injectorStartedAt = if ($session.State.injectorPid) {
+                Get-DreamSkinProcessStartedAt -ProcessId ([int]$session.State.injectorPid)
+              } else { $null }
+              $watcherLive = $null -ne $identity -and
+                $identity.BrowserId -ceq $session.BrowserId -and
+                $injectorStartedAt -eq "$($session.State.injectorStartedAt)"
+            } catch { $watcherLive = $false }
+          }
+          if ($watcherLive) {
+            $notify.ShowBalloonTip(1800, 'Codex Dream Skin', '背景图已更新，皮肤将自动刷新。', [System.Windows.Forms.ToolTipIcon]::Info)
+          } else {
+            Start-DreamSkinPowerShell -Script $startScript -Arguments @('-Port', "$Port", '-PromptRestart')
+            $notify.ShowBalloonTip(1800, 'Codex Dream Skin', '正在重新应用皮肤…', [System.Windows.Forms.ToolTipIcon]::Info)
+          }
         }
       } finally {
         $dialog.Dispose()

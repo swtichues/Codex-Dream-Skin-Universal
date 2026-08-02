@@ -200,6 +200,13 @@ html.codex-dream-skin .dream-home {
   background: var(--dream-surface) !important;
 }
 
+/* Current Codex home routes keep the content in a role=main element inside a
+   hashed outer <main>. On wide artwork, the home surface must stay transparent
+   so the window-level image is visible below the native controls. */
+html.codex-dream-skin.dream-art-wide .dream-home {
+  background: transparent !important;
+}
+
 .dream-home > div:first-child {
   min-height: 100% !important;
   padding-top: 24px !important;
@@ -403,6 +410,15 @@ html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner)
   background-attachment: fixed !important;
 }
 
+html.codex-dream-skin.dream-art-wide:has(.dream-home) body {
+  background-color: var(--dream-canvas) !important;
+  background-image: var(--dream-art) !important;
+  background-position: var(--dream-art-position) !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
 html.codex-dream-skin.dream-art-wide:has(main.main-surface.dream-home-shell)
   aside.app-shell-left-panel,
 html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner):has(main.main-surface:not(.dream-home-shell))
@@ -441,6 +457,16 @@ html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner)
   box-shadow: none !important;
 }
 
+html.codex-dream-skin.dream-art-wide main.dream-home-shell {
+  background: linear-gradient(90deg,
+    var(--dream-immersive-edge),
+    var(--dream-immersive-mid) 64%,
+    var(--dream-immersive-far)) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner) main.main-surface:not(.dream-home-shell) {
   background: linear-gradient(90deg,
     var(--dream-task-immersive-edge),
@@ -452,8 +478,11 @@ html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner)
   background: transparent !important;
 }
 
+/* Keep the art fallback on task pages. New Codex builds use a hashed main
+   surface class, so the body-background branch cannot be relied on to paint
+   the image behind the route content. */
 html.codex-dream-skin.dream-art-wide:is(.dream-task-ambient, .dream-task-banner) .dream-task::before {
-  content: none !important;
+  content: "" !important;
 }
 
 html.codex-dream-skin.dream-art-wide main.main-surface > header.app-header-tint {
