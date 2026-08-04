@@ -106,7 +106,7 @@
   const existingStyle = document.getElementById(STYLE_ID);
   if (existingStyle) {
     existingStyle.textContent = cssText;
-    existingStyle.dataset.dreamVersion = "3";
+    existingStyle.dataset.dreamVersion = "5";
   }
 
   const analyzeArt = () => new Promise((resolve) => {
@@ -349,13 +349,16 @@
       style.id = STYLE_ID;
       (document.head || root).appendChild(style);
     }
-    if (style.dataset.dreamVersion !== "3") {
+    if (style.dataset.dreamVersion !== "5") {
       style.textContent = cssText;
-      style.dataset.dreamVersion = "3";
+      style.dataset.dreamVersion = "5";
     }
 
-    const mainCandidates = [...document.querySelectorAll('[role="main"]')];
-    if (!mainCandidates.length) mainCandidates.push(shellMain);
+    const roleMainCandidates = [...document.querySelectorAll('[role="main"]')];
+    // Always include the shell main. A task route adds dream-task to this node,
+    // while modern Home later inserts a nested role=main. Omitting the shell in
+    // that second state leaves its task artwork pseudo-element active over Home.
+    const mainCandidates = [...new Set([shellMain, ...roleMainCandidates])];
     const isRenderedMain = (candidate) => {
       if (!candidate?.isConnected) return false;
       const rect = candidate.getBoundingClientRect();
@@ -366,15 +369,17 @@
     // Codex keeps dormant route containers in the DOM while switching between
     // Home and a task. Only the rendered Home route may drive the skin layout;
     // otherwise a stale home-icon makes task verification inspect an empty node.
-    const home = mainCandidates.find((candidate) =>
-      isRenderedMain(candidate) && candidate.querySelector('[data-testid="home-icon"]')) || null;
+    const home = roleMainCandidates.find((candidate) =>
+      isRenderedMain(candidate) && candidate.querySelector('[data-testid="home-icon"]')) ||
+      (isRenderedMain(shellMain) && shellMain.querySelector('[data-testid="home-icon"]') ? shellMain : null);
     for (const candidate of mainCandidates) {
+      const isHomeShellContainer = Boolean(home && candidate !== home && candidate.contains(home));
       candidate.classList.toggle("dream-home", candidate === home);
       candidate.classList.toggle(
         "dream-home-modern",
         candidate === home && Boolean(candidate.querySelector(":scope > div:first-child .home-banners")),
       );
-      candidate.classList.toggle("dream-task", candidate !== home);
+      candidate.classList.toggle("dream-task", candidate !== home && !isHomeShellContainer);
     }
     const utilityBars = new Set(home ? home.querySelectorAll('[class*="_homeUtilityBar_"]') : []);
     for (const candidate of document.querySelectorAll(`.${HOME_UTILITY_CLASS}`)) {
@@ -427,7 +432,7 @@
   });
   const timer = setInterval(ensure, 5000);
   window[STATE_KEY] = {
-    ensure, cleanup, observer, timer, scheduler, artUrl, profile, config, installToken, version: "1.2.1",
+    ensure, cleanup, observer, timer, scheduler, artUrl, profile, config, installToken, version: "1.2.3",
   };
   ensure();
   analyzeArt().then((result) => {
@@ -437,5 +442,5 @@
     state.profile = result;
     ensure();
   });
-  return { installed: true, version: "1.2.1", adaptive: true };
+  return { installed: true, version: "1.2.3", adaptive: true };
 })(__DREAM_CSS_JSON__, __DREAM_ART_JSON__, __DREAM_THEME_JSON__)

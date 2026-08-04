@@ -7,7 +7,7 @@ import { detectImageFormat, readImageMetadata } from "./image-metadata.mjs";
 const scriptPath = fileURLToPath(import.meta.url);
 const here = path.dirname(scriptPath);
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.2.1";
+const SKIN_VERSION = "1.2.3";
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 const STRONG_THEME_AUDIT_MS = 30000;
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]", "::1"]);
@@ -949,6 +949,25 @@ async function verifySession(session) {
           Number.parseFloat(renderedArtStyle?.opacity || '0') > 0)
       ),
     );
+    const isPaintedArt = (node, pseudo = null) => {
+      if (!node || !isRendered(node)) return false;
+      const style = getComputedStyle(node, pseudo);
+      const image = style.backgroundImage || '';
+      if (!image.includes('blob:') && !image.includes('data:image/')) return false;
+      if (style.display === 'none' || style.visibility === 'hidden' || Number.parseFloat(style.opacity || '1') <= 0) {
+        return false;
+      }
+      if (pseudo && (style.content === 'none' || style.content === 'normal')) return false;
+      return true;
+    };
+    const modernHomeRoot = modernHome ? (home.closest('main') || home) : null;
+    const modernHomeArtLayers = modernHomeRoot
+      ? [modernHomeRoot, ...modernHomeRoot.querySelectorAll('*')].flatMap((node) => [
+          isPaintedArt(node) ? node.tagName.toLowerCase() + '.background' : null,
+          isPaintedArt(node, '::before') ? node.tagName.toLowerCase() + '::before' : null,
+          isPaintedArt(node, '::after') ? node.tagName.toLowerCase() + '::after' : null,
+        ]).filter(Boolean)
+      : [];
     const viewport = { width: innerWidth, height: innerHeight };
     const composerVisible = Boolean(composer && composer.width > 0 && composer.height > 0 &&
       composer.x < viewport.width && composer.x + composer.width > 0 &&
@@ -966,6 +985,7 @@ async function verifySession(session) {
       dormantHomeCount: [...document.querySelectorAll('.dream-home')].filter((node) => !isRendered(node)).length,
       suggestionsPresent: Boolean(suggestions),
       homeIconPresent: Boolean(home?.querySelector('[data-testid="home-icon"]')),
+      modernHomeArtLayers,
       hero: box(home?.firstElementChild?.firstElementChild?.firstElementChild),
       cards,
       composer,
@@ -980,7 +1000,8 @@ async function verifySession(session) {
     result.pass = result.installed && result.artPresent && result.version === result.expectedVersion &&
       result.stylePresent && result.chromePresent &&
       result.chromePointerEvents === 'none' && result.composerVisible && Boolean(result.sidebar) &&
-      (!result.homePresent || (result.modernHome ? result.homeIconPresent : (Boolean(result.hero) &&
+      (!result.homePresent || (result.modernHome ? (result.homeIconPresent &&
+        result.modernHomeArtLayers.length === 0) : (Boolean(result.hero) &&
         (!result.suggestionsPresent || (result.cards.length >= 2 && result.cards.length <= 4)))));
     return result;
   })()`);
@@ -1472,6 +1493,19 @@ if (path.resolve(process.argv[1] || "") === path.resolve(scriptPath)) {
   }
   if (/dispatchKeyEvent|dispatchMouseEvent/.test(capture.toString())) {
     throw new Error("Screenshot capture must not dispatch renderer input events");
+  }
+  const cssSource = await fs.readFile(path.join(root, "assets", "dream-skin.css"), "utf8");
+  const nestedHomeArtSelectors = [...cssSource.matchAll(/([^{}]+)\{([^{}]*background-image:\s*var\(--dream-art\)[^{}]*)\}/g)]
+    .flatMap((match) => match[1].split(","))
+    .map((selector) => selector.trim())
+    .filter((selector) => /\.dream-home(?:\.[\w-]+|:[\w-]+(?:\([^)]*\))?)*\s*>/.test(selector));
+  if (!nestedHomeArtSelectors.length ||
+      nestedHomeArtSelectors.some((selector) => !selector.includes(".dream-home:not(.dream-home-modern) >"))) {
+    throw new Error("Modern Home must not inherit the legacy nested artwork layer");
+  }
+  const rendererSource = await fs.readFile(path.join(root, "assets", "renderer-inject.js"), "utf8");
+  if (!rendererSource.includes(`version: "${SKIN_VERSION}"`)) {
+    throw new Error("Renderer and injector skin versions are out of sync");
   }
   console.log(JSON.stringify({ pass: true, version: SKIN_VERSION, test: "loopback-cdp-validation" }));
   } else if (options.mode === "check-payload") {

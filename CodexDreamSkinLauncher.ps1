@@ -7,6 +7,9 @@ param(
   [switch]$PipelineSmokeTest,
   [ValidateRange(0, 3)][int]$PipelineSmokeWarnStage = 0,
   [ValidateRange(0, 3)][int]$PipelineSmokeFailStage = 0,
+  [switch]$ApplyAndVerify,
+  [string]$ApplyScreenshotPath,
+  [string]$ApplyReportPath,
   [string]$SnapshotPath
 )
 
@@ -231,6 +234,69 @@ $encoding = [System.Text.UTF8Encoding]::new($false)
 }
 
 if ($SelfTest) { Invoke-LauncherSelfTest }
+
+function Invoke-ApplyAndVerifyFromExe {
+  $startedAt = [datetime]::UtcNow
+  $startExitCode = $null
+  $verifyExitCode = $null
+  $errorMessage = $null
+  try {
+    $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
+    $startScript = Join-Path $ScriptsDir 'start-dream-skin.ps1'
+    $verifyScript = Join-Path $ScriptsDir 'verify-dream-skin.ps1'
+    foreach ($required in @($startScript, $verifyScript)) {
+      if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+        throw "缺少脚本：$required"
+      }
+    }
+
+    $startArguments = @(
+      '-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+      '-File', $startScript, '-PromptRestart'
+    ) | ForEach-Object { ConvertTo-WindowsProcessArgument -Value "$_" }
+    $startProcess = Start-Process -FilePath $powershell -ArgumentList ($startArguments -join ' ') `
+      -WindowStyle Hidden -PassThru -Wait
+    $startExitCode = [int]$startProcess.ExitCode
+    if ($startExitCode -ne 0) { throw "皮肤应用失败，错误代码：$startExitCode" }
+
+    $verifyArguments = @(
+      '-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+      '-File', $verifyScript
+    )
+    if ($ApplyScreenshotPath) {
+      $verifyArguments += @('-ScreenshotPath', [System.IO.Path]::GetFullPath($ApplyScreenshotPath))
+    }
+    $verifyArgumentLine = ($verifyArguments | ForEach-Object {
+      ConvertTo-WindowsProcessArgument -Value "$_"
+    }) -join ' '
+    $verifyProcess = Start-Process -FilePath $powershell -ArgumentList $verifyArgumentLine `
+      -WindowStyle Hidden -PassThru -Wait
+    $verifyExitCode = [int]$verifyProcess.ExitCode
+    if ($verifyExitCode -ne 0) { throw "实时验证失败，错误代码：$verifyExitCode" }
+  } catch {
+    $errorMessage = $_.Exception.Message
+  }
+
+  $result = [ordered]@{
+    schemaVersion = 1
+    action = 'apply-and-verify'
+    pass = [bool](-not $errorMessage -and $startExitCode -eq 0 -and $verifyExitCode -eq 0)
+    startedAt = $startedAt.ToString('o')
+    completedAt = [datetime]::UtcNow.ToString('o')
+    packageRoot = $BaseDir
+    startExitCode = $startExitCode
+    verifyExitCode = $verifyExitCode
+    screenshotPath = if ($ApplyScreenshotPath) { [System.IO.Path]::GetFullPath($ApplyScreenshotPath) } else { $null }
+    error = $errorMessage
+  }
+  if ($ApplyReportPath) {
+    Write-StrictUtf8 -Path $ApplyReportPath -Content (($result | ConvertTo-Json -Depth 4) + "`r`n")
+  }
+  if (-not $result.pass) { exit 1 }
+  exit 0
+}
+
+if ($ApplyAndVerify) { Invoke-ApplyAndVerifyFromExe }
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing

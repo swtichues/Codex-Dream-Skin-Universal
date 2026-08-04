@@ -207,19 +207,22 @@ html.codex-dream-skin.dream-art-wide .dream-home {
   background: transparent !important;
 }
 
-.dream-home > div:first-child {
+/* These deep child selectors describe the legacy Home hero only. Modern Home
+   starts with a home-banners row at the same DOM depth; matching that row would
+   paint --dream-art a second time over the window-level background. */
+.dream-home:not(.dream-home-modern) > div:first-child {
   min-height: 100% !important;
   padding-top: 24px !important;
 }
 
-.dream-home > div:first-child > div:first-child {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child {
   flex: 0 0 clamp(390px, 42cqw, 510px) !important;
   min-height: 390px !important;
   align-items: flex-start !important;
   padding-bottom: 0 !important;
 }
 
-.dream-home > div:first-child > div:first-child > div:first-child {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child {
   position: relative !important;
   isolation: isolate;
   width: calc(100% - 56px) !important;
@@ -238,11 +241,11 @@ html.codex-dream-skin.dream-art-wide .dream-home {
   box-shadow: var(--dream-shadow) !important;
 }
 
-html.codex-dream-skin.dream-art-wide .dream-home > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-art-wide .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child {
   background-size: cover !important;
 }
 
-.dream-home > div:first-child > div:first-child > div:first-child::before {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
   content: "";
   position: absolute;
   z-index: 0;
@@ -251,19 +254,19 @@ html.codex-dream-skin.dream-art-wide .dream-home > div:first-child > div:first-c
   background: linear-gradient(90deg, var(--dream-hero-shade) 0 32%, transparent 70%);
 }
 
-html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child::before {
+html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
   background: linear-gradient(270deg, var(--dream-hero-shade) 0 32%, transparent 70%);
 }
 
-html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child::before {
+html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
   background: radial-gradient(ellipse at center, var(--dream-hero-shade) 0 23%, transparent 72%);
 }
 
-html.codex-dream-skin.dream-safe-none .dream-home > div:first-child > div:first-child > div:first-child::before {
+html.codex-dream-skin.dream-safe-none .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
   background: transparent;
 }
 
-.dream-home > div:first-child > div:first-child > div:first-child > div:first-child {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
@@ -273,26 +276,26 @@ html.codex-dream-skin.dream-safe-none .dream-home > div:first-child > div:first-
   padding: 30px 40px;
 }
 
-.dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
   width: min(48%, 520px) !important;
   align-items: flex-start !important;
   gap: 0 !important;
 }
 
-html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child {
   justify-content: flex-end !important;
 }
 
-html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
   align-items: flex-end !important;
   text-align: right !important;
 }
 
-html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child {
   justify-content: center !important;
 }
 
-html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
   align-items: center !important;
   text-align: center !important;
 }
@@ -327,7 +330,7 @@ html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:firs
   text-underline-offset: 4px;
 }
 
-.dream-home > div:first-child > div:first-child > div:first-child > div:nth-child(2) {
+.dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:nth-child(2) {
   left: 0 !important;
   right: 0 !important;
   top: 100% !important;
@@ -502,16 +505,16 @@ html.codex-dream-skin.dream-art-wide main.main-surface [role="main"] {
   background: transparent !important;
 }
 
-html.codex-dream-skin.dream-art-wide main.main-surface.dream-home-shell
-  .dream-home > div:first-child > div:first-child > div:first-child {
+html.codex-dream-skin.dream-art-wide main.dream-home-shell
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child {
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
-html.codex-dream-skin.dream-art-wide main.main-surface.dream-home-shell
-  .dream-home > div:first-child > div:first-child > div:first-child::before {
+html.codex-dream-skin.dream-art-wide main.dream-home-shell
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
   content: none !important;
 }
 
@@ -621,32 +624,32 @@ html.codex-dream-skin.dream-art-wide main.main-surface
     --thread-content-max-width: min(940px, calc(100cqw - 36px)) !important;
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child {
     width: calc(100% - 36px) !important;
   }
 }
 
 @media (max-width: 900px) {
-  .dream-home > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child {
     padding-top: 16px !important;
   }
 
-  .dream-home > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child {
     flex-basis: 370px !important;
     min-height: 370px !important;
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child {
     height: 220px !important;
     min-height: 220px !important;
     border-radius: 16px !important;
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child {
     padding: 24px;
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
     width: 62% !important;
   }
 
@@ -662,21 +665,21 @@ html.codex-dream-skin.dream-art-wide main.main-surface
 }
 
 @media (max-width: 680px) {
-  .dream-home > div:first-child > div:first-child > div:first-child::before,
-  html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child::before,
-  html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child::before {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before,
+  html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before,
+  html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child::before {
     background: color-mix(in oklab, var(--dream-surface) 78%, transparent);
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child > div:first-child,
-  html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child > div:first-child,
-  html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child,
+  html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child,
+  html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child {
     justify-content: center !important;
   }
 
-  .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child,
-  html.codex-dream-skin.dream-safe-right .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child,
-  html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
+  .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child,
+  html.codex-dream-skin.dream-safe-right .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child,
+  html.codex-dream-skin.dream-safe-center .dream-home:not(.dream-home-modern) > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
     width: min(88%, 440px) !important;
     align-items: center !important;
     text-align: center !important;

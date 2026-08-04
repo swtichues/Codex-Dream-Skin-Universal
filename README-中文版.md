@@ -191,6 +191,14 @@ powershell.exe -NoProfile -STA -ExecutionPolicy Bypass `
 
 ### 启动或重新应用
 
+优先通过 EXE 完成重新应用与实时验证：
+
+```powershell
+.\CodexDreamSkinLauncher.exe -ApplyAndVerify
+```
+
+也可以打开 `CodexDreamSkinLauncher.exe`，点击 **“开始安装 / 修复”**。以下脚本入口主要用于诊断和开发：
+
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -File .\windows\scripts\start-dream-skin.ps1 -PromptRestart
@@ -257,4 +265,3 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
    ├─ assets
    └─ scripts
 ```
-
