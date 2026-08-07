@@ -2,16 +2,19 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-$engineScripts = Join-Path $env:LOCALAPPDATA 'CodexDreamSkin\engine\scripts'
+$sourceRoot = Split-Path -Parent $PSScriptRoot
+$stateRoot = Join-Path $env:LOCALAPPDATA 'CodexDreamSkin'
 
 try {
-  if (-not (Test-Path -LiteralPath $engineScripts)) {
-    throw '尚未完成首次安装。请先运行 01_首次安装主题.cmd。'
-  }
+  # Keep the installed runtime in sync before choosing an image.  Previously
+  # this entry point loaded its scripts from the existing runtime first, so a
+  # stale verifier could reject a correctly applied skin after a Codex update.
+  . (Join-Path $PSScriptRoot 'common-windows.ps1')
+  . (Join-Path $PSScriptRoot 'theme-windows.ps1')
+  $null = Install-DreamSkinRuntimeEngine -SkillRoot $sourceRoot -StateRoot $stateRoot
+
   Add-Type -AssemblyName System.Windows.Forms
   Add-Type -AssemblyName System.Drawing
-  . (Join-Path $engineScripts 'common-windows.ps1')
-  . (Join-Path $engineScripts 'theme-windows.ps1')
 
   $dialog = [System.Windows.Forms.OpenFileDialog]::new()
   $dialog.Title = '选择 Codex Dream Skin 背景图'
@@ -19,7 +22,6 @@ try {
   $dialog.Multiselect = $false
   try {
     if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { exit 0 }
-    $stateRoot = Join-Path $env:LOCALAPPDATA 'CodexDreamSkin'
     $null = Set-DreamSkinActiveTheme -ImagePath $dialog.FileName -Theme $null -StateRoot $stateRoot
     Set-DreamSkinPaused -Paused $false -StateRoot $stateRoot | Out-Null
   } finally {
@@ -57,7 +59,7 @@ try {
     exit 0
   }
 
-  $startScript = Join-Path $engineScripts 'start-dream-skin.ps1'
+  $startScript = Join-Path $PSScriptRoot 'start-dream-skin.ps1'
   $startOutput = & powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File $startScript -PromptRestart 2>&1
   if ($LASTEXITCODE -ne 0) {
     $detail = ($startOutput | Out-String).Trim()

@@ -106,7 +106,7 @@
   const existingStyle = document.getElementById(STYLE_ID);
   if (existingStyle) {
     existingStyle.textContent = cssText;
-    existingStyle.dataset.dreamVersion = "5";
+    existingStyle.dataset.dreamVersion = "6";
   }
 
   const analyzeArt = () => new Promise((resolve) => {
@@ -349,9 +349,9 @@
       style.id = STYLE_ID;
       (document.head || root).appendChild(style);
     }
-    if (style.dataset.dreamVersion !== "5") {
+    if (style.dataset.dreamVersion !== "6") {
       style.textContent = cssText;
-      style.dataset.dreamVersion = "5";
+      style.dataset.dreamVersion = "6";
     }
 
     const roleMainCandidates = [...document.querySelectorAll('[role="main"]')];
@@ -432,7 +432,7 @@
   });
   const timer = setInterval(ensure, 5000);
   window[STATE_KEY] = {
-    ensure, cleanup, observer, timer, scheduler, artUrl, profile, config, installToken, version: "1.2.3",
+    ensure, cleanup, observer, timer, scheduler, artUrl, profile, config, installToken, version: "1.2.4",
   };
   ensure();
   analyzeArt().then((result) => {
@@ -442,5 +442,5 @@
     state.profile = result;
     ensure();
   });
-  return { installed: true, version: "1.2.3", adaptive: true };
+  return { installed: true, version: "1.2.4", adaptive: true };
 })(__DREAM_CSS_JSON__, __DREAM_ART_JSON__, __DREAM_THEME_JSON__)

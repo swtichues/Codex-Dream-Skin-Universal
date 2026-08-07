@@ -7,7 +7,7 @@ import { detectImageFormat, readImageMetadata } from "./image-metadata.mjs";
 const scriptPath = fileURLToPath(import.meta.url);
 const here = path.dirname(scriptPath);
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.2.3";
+const SKIN_VERSION = "1.2.4";
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 const STRONG_THEME_AUDIT_MS = 30000;
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]", "::1"]);
@@ -925,7 +925,34 @@ async function verifySession(session) {
     const modernHome = Boolean(home?.classList.contains('dream-home-modern'));
     const suggestions = home?.querySelector('.group\\\\/home-suggestions') ?? null;
     const cards = suggestions ? [...suggestions.querySelectorAll('button')].map(box) : [];
-    const composer = box(document.querySelector('.composer-surface-chrome'));
+    // Codex changes the composer container between desktop releases.  The old
+    // check only recognized one internal class, so a fully visible composer
+    // could incorrectly be reported as missing and trigger a rollback.
+    const composerSelectors = [
+      '.composer-surface-chrome',
+      '[data-testid*="composer"]',
+      'form:has(textarea)',
+      'form:has([contenteditable="true"])',
+      '[contenteditable="true"][role="textbox"]',
+      'textarea[placeholder]',
+      'textarea',
+    ];
+    let composerNode = null;
+    let composerSource = null;
+    for (const selector of composerSelectors) {
+      let candidates = [];
+      try { candidates = [...document.querySelectorAll(selector)]; } catch { continue; }
+      for (const candidate of candidates) {
+        const container = candidate.closest('form, [data-testid*="composer"], [class*="composer"]') || candidate;
+        if (isRendered(container)) {
+          composerNode = container;
+          composerSource = selector;
+          break;
+        }
+      }
+      if (composerNode) break;
+    }
+    const composer = box(composerNode);
     const sidebar = box(document.querySelector('aside.app-shell-left-panel'));
     const artVariable = root?.style.getPropertyValue('--dream-art')?.trim() || '';
     const bodyBackground = getComputedStyle(document.body || root).backgroundImage || '';
@@ -989,6 +1016,7 @@ async function verifySession(session) {
       hero: box(home?.firstElementChild?.firstElementChild?.firstElementChild),
       cards,
       composer,
+      composerSource,
       composerVisible,
       sidebar,
       viewport,

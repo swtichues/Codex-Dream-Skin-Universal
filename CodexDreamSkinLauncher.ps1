@@ -242,6 +242,13 @@ function Invoke-ApplyAndVerifyFromExe {
   $errorMessage = $null
   try {
     $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
+    # Apply through the EXE must also refresh the managed engine.  Otherwise an
+    # image change can relaunch an old verifier even after the source package is
+    # fixed, which makes a successful render look like a failed application.
+    . (Join-Path $ScriptsDir 'common-windows.ps1')
+    . (Join-Path $ScriptsDir 'theme-windows.ps1')
+    $runtimeSourceRoot = Split-Path -Parent $ScriptsDir
+    $null = Install-DreamSkinRuntimeEngine -SkillRoot $runtimeSourceRoot -StateRoot $StateRoot
     $startScript = Join-Path $ScriptsDir 'start-dream-skin.ps1'
     $verifyScript = Join-Path $ScriptsDir 'verify-dream-skin.ps1'
     foreach ($required in @($startScript, $verifyScript)) {
